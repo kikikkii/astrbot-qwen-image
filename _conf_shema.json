@@ -1,0 +1,10 @@
+{
+    "api-key": {
+        "description": "阿里云的api-key",
+        "type": "text"
+    },
+    "base_url": {
+        "description": "api的url",
+        "type": "string"
+    }
+}
