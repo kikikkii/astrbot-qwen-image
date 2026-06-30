@@ -9,7 +9,7 @@ from astrbot.api.message_components import Image, ComponentType
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger, AstrBotConfig
 from qwen_api.QwenGenerateRequest import QwenImageRequest, Message, GenerationParameters
-from qwen_api.qwen_image import multimodal_generation
+from qwen_api.qwen_image import multimodal_generation, save_images
 
 @register("QwenImagePlugin", "lbh", "千问生图插件", "1.0.0")
 class QwenImagePlugin(Star):
@@ -82,7 +82,7 @@ class QwenImagePlugin(Star):
         response = await multimodal_generation(
             request=request, baseurl=self.base_url, api_key=self.qwen_API_KEY
         )
-        await qwen_api.save_images(response=response)
+        await save_images(response=response)
         # 返回结果
         yield event.plain_result(
             f"成功生成图片，消耗：{response.usage}"
