@@ -57,13 +57,12 @@ class QwenImagePlugin(Star):
     @filter.command("qwen-image")
 
     async def qwen_image(self, event: AstrMessageEvent):
-
         user_name = event.get_sender_name()
 
         message_str = event.message_str  # 用户发的纯文本消息字符串
 
         message_chain = event.get_messages()
-
+        yield event.plain_result("收到生成图片请求")
         # 提取所有图片
         images = [comp for comp in message_chain if comp.type == ComponentType.Image]
 
@@ -83,7 +82,7 @@ class QwenImagePlugin(Star):
         response = await multimodal_generation(
             request=request, baseurl=self.base_url, api_key=self.qwen_API_KEY
         )
-
+        await qwen_api.save_images(response=response)
         # 返回结果
         yield event.plain_result(
             f"成功生成图片，消耗：{response.usage}"
