@@ -61,7 +61,7 @@ class QwenImagePlugin(Star):
         images = [comp for comp in message_chain if comp.type == ComponentType.Image]
 
         for image in images:
-            logger.info(image)
+            logger.info(image.url)
         # images = event.
 
 
