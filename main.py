@@ -1,11 +1,13 @@
-from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
+from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult, AstrbotConfig
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger
 
 @register("helloworld", "YourName", "一个简单的 Hello World 插件", "1.0.0")
 class MyPlugin(Star):
-    def __init__(self, context: Context):
+    def __init__(self, context: Context, config: AstrbotConfig):
         super().__init__(context)
+        self.config = config
+        logger.info(self.config)
 
     async def initialize(self):
         logger.info("qwen-image初始化成功")
@@ -25,6 +27,7 @@ class MyPlugin(Star):
     async def qwen_image(self, event: AstrMessageEvent):
         user_name = event.get_sender_name()
         message_str = event.message_str # 用户发的纯文本消息字符串
+        # images = event.
 
 
     async def terminate(self):
