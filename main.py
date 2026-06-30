@@ -2,7 +2,8 @@ from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.message_components import Image, ComponentType
 from astrbot.api.star import Context, Star, register
 from astrbot.api import logger, AstrBotConfig
-
+from qwen_api.QwenGenerateRequest import QwenImageRequest, Message, GenerationParameters
+import qwen_api.qwen_image
 
 @register("QwenImagePlugin", "lbh", "千问生图插件", "1.0.0")
 class QwenImagePlugin(Star):
@@ -59,9 +60,20 @@ class QwenImagePlugin(Star):
 
         # 提取所有图片
         images = [comp for comp in message_chain if comp.type == ComponentType.Image]
-
+        
+        input_message = Message()
+        input_message.add_text(message_str)
         for image in images:
-            logger.info(image.url)
+            input_message.add_image(image_url=images.url)
+        request = (
+            QwenImageRequest(self.model_name, input_message)
+        )
+        response = await qwen_api.multimodal_generation(request=request, baseurl=self.base_url, api_key=self.qwen_API_KEY)
+        yield event.plain_result("成功生成图片，消耗：{}", response.usage)
+        for image_result in response.images:
+            yield event.image_result(image_result.url)
+
+
         # images = event.
 
 
