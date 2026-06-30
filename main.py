@@ -4,7 +4,7 @@ from astrbot.api import logger, AstrBotConfig
 
 @register("helloworld", "YourName", "一个简单的 Hello World 插件", "1.0.0")
 class MyPlugin(Star):
-    def __init__(self, context: Context, config: AstrbotConfig):
+    def __init__(self, context: Context, config: AstrBotConfig
         super().__init__(context)
         self.config = config
         logger.info(self.config)
