@@ -16,18 +16,19 @@ from .tool.qwen_tool import QwenTool
 class QwenImagePlugin(Star):
 
     def __init__(self, context: Context, config: AstrBotConfig=None):
-
         super().__init__(context)
 
         self.config = config
-        logger.info(self.config)
+        logger.info("插件配置：%s", self.config)
+
+        if self.config is None:
+            logger.warning("未提供插件配置，跳过 QwenTool 注册")
+            return
 
         self.qwen_API_KEY = self.config["api-key"]
-
         self.base_url = self.config["base-url"]
-
         self.model_name = self.config["model-name"]
-        self.context.add_llm_tools(QwenTool(self.model_name))
+        self.context.add_llm_tools(QwenTool(model=self.model_name, base_url=self.base_url, qwen_API_KEY=self.qwen_API_KEY))
 
 
 
