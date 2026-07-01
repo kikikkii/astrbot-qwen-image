@@ -10,6 +10,7 @@ from astrbot.api.star import Context, Star, register
 from astrbot.api import logger, AstrBotConfig
 from qwen_api.QwenGenerateRequest import QwenImageRequest, Message, GenerationParameters
 from qwen_api.qwen_image import multimodal_generation, save_images
+from .tool.qwen_tool import QwenTool
 
 @register("QwenImagePlugin", "lbh", "千问生图插件", "1.0.0")
 class QwenImagePlugin(Star):
@@ -26,6 +27,8 @@ class QwenImagePlugin(Star):
         self.base_url = self.config["base-url"]
 
         self.model_name = self.config["model-name"]
+        self.context.add_llm_tools(QwenTool(self.model_name))
+
 
 
     async def initialize(self):
