@@ -46,22 +46,28 @@ class QwenTool(FunctionTool[AstrAgentContext]):
         request = QwenImageRequest(model=self.model)
 
         input_message = Message()
-        prompts: str = kwargs["prompts"]
-        if not prompts or prompts == "":
+        prompts: str = kwargs.get("prompts", "")
+        if not prompts:
             logger.info("提示词为空")
         input_message.add_text(prompts)
-        images: list = kwargs["images"]
-        if not images or len(images) == 0:
-            logger.info("图片为空")
+
+        images: list = kwargs.get("images", [])
+        if not images:
+            logger.info("未提供参考图片")
         for image in images:
-            input_message.add_image(image)
+            input_message.add_image(image_url=image)
 
         request.add_message(input_message)
         # 调用 Qwen-Image API
         response = await multimodal_generation(
             request=request, baseurl=self.base_url, api_key=self.qwen_API_KEY
         )
-        return response
+
+        urls = [img.url for img in response.images]
+        result_text = f"成功生成 {len(urls)} 张图片"
+        if urls:
+            result_text += "\n" + "\n".join(urls)
+        return ToolExecResult(result=result_text)
 
 
 

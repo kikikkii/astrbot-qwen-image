@@ -64,6 +64,8 @@ class QwenImagePlugin(Star):
         user_name = event.get_sender_name()
 
         message_str = event.message_str  # 用户发的纯文本消息字符串
+        # 去掉指令前缀，只保留提示词
+        prompt = message_str.removeprefix("/qwen-image").strip()
 
         message_chain = event.get_messages()
         yield event.plain_result("收到生成图片请求")
@@ -72,27 +74,39 @@ class QwenImagePlugin(Star):
 
         # 构建输入消息
         input_message = Message()
-        input_message.add_text(message_str)
+        input_message.add_text(prompt)
         for img in images:
-            # 优先使用 URL，其次使用 file 字段
-            img_ref = img.url or img.file or ""
+            # 只使用 URL，本地文件路径无法被千问 API 访问
+            img_ref = img.url or ""
+            if not img_ref:
+                logger.warning("跳过无 URL 的图片: %s", img.file)
+                continue
             input_message.add_image(image_url=img_ref)
 
         # 构建请求
         request = QwenImageRequest(model=self.model_name)
         request.add_message(input_message)
 
-        # 调用 Qwen-Image API
-        response = await multimodal_generation(
-            request=request, baseurl=self.base_url, api_key=self.qwen_API_KEY
-        )
-        await save_images(response=response)
-        # 返回结果
-        yield event.plain_result(
-            f"成功生成图片，消耗：{response.usage}"
-        )
-        for image_result in response.images:
-            yield event.image_result(image_result.url)
+        try:
+            # 调用 Qwen-Image API
+            response = await multimodal_generation(
+                request=request, baseurl=self.base_url, api_key=self.qwen_API_KEY
+            )
+            await save_images(response=response)
+
+            urls = [img.url for img in response.images]
+            usage_info = (
+                f"图片数量={response.usage.image_count}, "
+                f"尺寸={response.usage.width}x{response.usage.height}"
+            )
+            yield event.plain_result(
+                f"成功生成 {len(response.images)} 张图片，{usage_info}"
+            )
+            for img_url in urls:
+                yield event.image_result(img_url)
+        except Exception as e:
+            logger.error("千问生图失败: %s", e)
+            yield event.plain_result(f"生图失败: {e}")
 
 
 
