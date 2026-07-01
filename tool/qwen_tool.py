@@ -64,10 +64,4 @@ class QwenTool(FunctionTool[AstrAgentContext]):
         )
 
         urls = [img.url for img in response.images]
-        result_text = f"成功生成 {len(urls)} 张图片"
-        if urls:
-            result_text += "\n" + "\n".join(urls)
-        return ToolExecResult(result=result_text)
-
-
-
+        return f"成功生成 {len(urls)} 张图片\n" + "\n".join(urls)
